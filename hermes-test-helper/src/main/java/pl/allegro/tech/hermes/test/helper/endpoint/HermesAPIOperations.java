@@ -108,7 +108,11 @@ public class HermesAPIOperations {
             return subscription;
         }
 
-        assertThat(endpoints.subscription().create(topic.getQualifiedName(), subscription).getStatus()).isEqualTo(CREATED.getStatusCode());
+        Response response = endpoints.subscription().create(topic.getQualifiedName(), subscription);
+        assertThat(response.getStatus())
+                .isEqualTo(CREATED.getStatusCode())
+                .overridingErrorMessage("Expected successful %s subscription creation but received %d status code. Response details: %s ",
+                        subscription.getQualifiedName().toString(), response.getStatus(), response.readEntity(String.class));
 
         wait.untilSubscriptionCreated(topic, subscription);
         return subscription;

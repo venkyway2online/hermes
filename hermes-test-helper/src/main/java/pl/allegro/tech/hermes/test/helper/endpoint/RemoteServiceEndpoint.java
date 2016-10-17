@@ -204,7 +204,11 @@ public class RemoteServiceEndpoint {
     }
 
     public void stop() {
-        listener.shutdown();
-        service.shutdown();
+        try {
+            listener.shutdown();
+            service.shutdown();
+        } catch (RuntimeException ex) {
+            logger.warn("Error while stopping remote service.", ex);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package pl.allegro.tech.hermes.integration.management;
 
-import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 import pl.allegro.tech.hermes.api.ErrorCode;
 import pl.allegro.tech.hermes.api.Topic;
@@ -10,6 +9,9 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.jayway.awaitility.Awaitility.await;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static pl.allegro.tech.hermes.api.ContentType.AVRO;
 import static pl.allegro.tech.hermes.api.ContentType.JSON;
 import static pl.allegro.tech.hermes.integration.test.HermesAssertions.assertThat;
@@ -29,7 +31,7 @@ public class TopicManagementTest extends IntegrationTest {
 
         // then
         assertThat(response).hasStatus(Response.Status.CREATED);
-        Assertions.assertThat(management.topic().get("createTopicGroup.topic")).isNotNull();
+        assertThat(management.topic().get("createTopicGroup.topic")).isNotNull();
     }
 
     @Test
@@ -40,7 +42,7 @@ public class TopicManagementTest extends IntegrationTest {
         operations.createTopic("listTopicsGroup", "topic2");
 
         // when then
-        Assertions.assertThat(management.topic().list("listTopicsGroup", false)).containsOnlyOnce(
+        assertThat(management.topic().list("listTopicsGroup", false)).containsOnlyOnce(
                 "listTopicsGroup.topic1", "listTopicsGroup.topic2");
     }
 
@@ -55,7 +57,7 @@ public class TopicManagementTest extends IntegrationTest {
 
         // then
         assertThat(response).hasStatus(Response.Status.OK);
-        Assertions.assertThat(management.topic().list("removeTopicGroup", false)).isEmpty();
+        assertThat(management.topic().list("removeTopicGroup", false)).isEmpty();
     }
 
     @Test
@@ -86,7 +88,7 @@ public class TopicManagementTest extends IntegrationTest {
 
         // then
         assertThat(response).hasStatus(Response.Status.CREATED);
-        Assertions.assertThat(management.topic().get("recreateTopicGroup.topic")).isNotNull();
+        await().atMost(3, SECONDS).until(() -> assertThat(management.topic().get("recreateTopicGroup.topic")).isNotNull());
     }
 
     @Test
@@ -206,7 +208,7 @@ public class TopicManagementTest extends IntegrationTest {
 
         // then
         assertThat(response).hasStatus(Response.Status.CREATED);
-        Assertions.assertThat(management.topic().get(qualifiedTopicName)).isNotNull();
+        assertThat(management.topic().get(qualifiedTopicName)).isNotNull();
     }
 
     @Test

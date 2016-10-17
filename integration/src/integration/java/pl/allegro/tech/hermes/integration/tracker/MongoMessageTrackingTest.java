@@ -281,7 +281,8 @@ public class MongoMessageTrackingTest extends IntegrationTest {
                 .isEqualTo(findAllBatchIdsByTopic(sentMessages, "logBatchSending.topic").get(messageId2));
     }
 
-    @Test
+    @Unreliable
+    @Test(enabled = false)
     public void shouldLogBatchInflightAndSending() {
         // given
         TestMessage message = TestMessage.simple();

@@ -17,15 +17,20 @@ public class MaxRateProviderFactory {
     private final HermesMetrics metrics;
 
     @Inject
-    public MaxRateProviderFactory(ConfigFactory configFactory, MaxRateRegistry maxRateRegistry, HermesMetrics metrics) {
+    public MaxRateProviderFactory(ConfigFactory configFactory,
+                                  MaxRateRegistry maxRateRegistry,
+                                  HermesMetrics metrics) {
         this.configFactory = configFactory;
         this.maxRateRegistry = maxRateRegistry;
         this.metrics = metrics;
     }
 
-    public MaxRateProvider create(Subscription subscription, SendCounters sendCounters) {
+    public MaxRateProvider create(Subscription subscription, MaxRateSupervisor maxRateSupervisor,
+                                  SendCounters sendCounters) {
         String consumerId = configFactory.getStringProperty(CONSUMER_WORKLOAD_NODE_ID);
         int historyLimit = configFactory.getIntProperty(CONSUMER_MAXRATE_HISTORY_SIZE);
-        return new MaxRateProvider(consumerId, maxRateRegistry, subscription, sendCounters, metrics, historyLimit);
+        MaxRateProvider maxRateProvider = new MaxRateProvider(consumerId,
+                maxRateRegistry, maxRateSupervisor, subscription, sendCounters, metrics, historyLimit);
+        return maxRateProvider;
     }
 }

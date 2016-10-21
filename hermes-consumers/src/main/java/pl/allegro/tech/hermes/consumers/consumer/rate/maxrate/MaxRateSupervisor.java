@@ -84,4 +84,8 @@ public class MaxRateSupervisor implements Runnable {
     public void register(MaxRateProvider maxRateProvider) {
         providers.add(maxRateProvider);
     }
+
+    public void unregister(MaxRateProvider maxRateProvider) {
+        providers.remove(maxRateProvider);
+    }
 }

@@ -12,10 +12,11 @@ public class MaxRateProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MaxRateProvider.class);
 
-    private static final double FALLBACK_MAX_RATE = 1.0;
+    private static final double FALLBACK_MAX_RATE = 1.0; // TODO use property
 
     private final String consumerId;
     private final MaxRateRegistry registry;
+    private final MaxRateSupervisor maxRateSupervisor;
     // TODO: need only subscription qualified name - the other details could be updated during runtime, and we don't need to handle that
     private final Subscription subscription;
     private final SendCounters sendCounters;
@@ -23,10 +24,11 @@ public class MaxRateProvider {
     private final int historyLimit;
     private volatile double maxRate = FALLBACK_MAX_RATE;
 
-    MaxRateProvider(String consumerId, MaxRateRegistry registry, Subscription subscription,
-                    SendCounters sendCounters, HermesMetrics metrics, int historyLimit) {
+    MaxRateProvider(String consumerId, MaxRateRegistry registry, MaxRateSupervisor maxRateSupervisor,
+                    Subscription subscription, SendCounters sendCounters, HermesMetrics metrics, int historyLimit) {
         this.consumerId = consumerId;
         this.registry = registry;
+        this.maxRateSupervisor = maxRateSupervisor;
         this.subscription = subscription;
         this.sendCounters = sendCounters;
         this.metrics = metrics;
@@ -65,9 +67,23 @@ public class MaxRateProvider {
             return registry.readMaxRate(subscription, consumerId);
         } catch (Exception e) {
             metrics.maxRateFetchFailuresCounter(subscription).inc();
-            logger.warn("Encountered problem fetching max rate for subscription: {}, consumer: {}. Setting default max rate: {}",
+            logger.warn("Encountered problem fetching max rate for subscription: {}, consumer: {}." +
+                            " Setting default max rate: {}",
                     subscription.getQualifiedName(), consumerId, FALLBACK_MAX_RATE);
             return Optional.empty();
         }
+    }
+
+
+    public void start() {
+        maxRateSupervisor.register(this);
+        metrics.registerMaxRateGauge(subscription, this::get);
+        metrics.registerRateGauge(subscription, sendCounters::getRate);
+    }
+
+    public void shutdown() {
+        maxRateSupervisor.unregister(this);
+        metrics.unregisterMaxRateGauge(subscription);
+        metrics.unregisterRateGauge(subscription);
     }
 }

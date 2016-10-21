@@ -25,8 +25,8 @@ public class OutputRateCalculatorFactory {
     }
 
     public OutputRateCalculator createCalculator(Subscription subscription, SendCounters sendCounters) {
-        MaxRateProvider maxRateProvider = maxRateProviderFactory.create(subscription, sendCounters);
-        maxRateSupervisor.register(maxRateProvider);
-        return new OutputRateCalculator(subscription, configFactory, maxRateProvider);
+        MaxRateProvider maxRateProvider =
+                maxRateProviderFactory.create(subscription, maxRateSupervisor, sendCounters);
+        return new OutputRateCalculator(configFactory, maxRateProvider);
     }
 }

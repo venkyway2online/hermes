@@ -39,7 +39,7 @@ public class OutputRateCalculatorTest {
         MaxRateProvider maxRateProvider = mock(MaxRateProvider.class);
         when(maxRateProvider.get()).thenReturn(100D);
 
-        calculator = new OutputRateCalculator(subscription, config, maxRateProvider);
+        calculator = new OutputRateCalculator(config, maxRateProvider);
     }
 
     @Test
